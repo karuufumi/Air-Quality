@@ -17,9 +17,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
   return (
     <>
-      <div className="flex min-h-screen bg-gray-100">
+      <div className="flex flex-col lg:flex-row min-h-screen bg-[##f9f9f9]">
         <SideBar onAuthClick={openAuth} />
-        <main>{children}</main>
+        <main className="flex-1">{children}</main>
       </div>
       {showAuth && <AuthOverlay initialMode={authMode} onClose={closeAuth} />}
     </>
