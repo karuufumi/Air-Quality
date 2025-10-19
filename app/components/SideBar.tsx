@@ -17,7 +17,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
   const [showLabel, setShowLabel] = useState<number | null>(null)
   const menuItems: MenuItem[] = [
     { id: "Reports", icon: "fa fa-line-chart", href: "/" },
-    { id: "History", icon: "fa fa-history", href: "/history" },
+    { id: "History", icon: "fa fa-history", href: "/History" },
   ]
 
   const getActiveItem = () => {
