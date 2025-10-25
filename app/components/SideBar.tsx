@@ -17,7 +17,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
   const [showLabel, setShowLabel] = useState<number | null>(null)
   const menuItems: MenuItem[] = [
     { id: "Reports", icon: "fa fa-line-chart", href: "/" },
-    { id: "History", icon: "fa fa-history", href: "/history" },
+    { id: "History", icon: "fa fa-history", href: "/History" },
   ]
 
   const getActiveItem = () => {
@@ -29,7 +29,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
 
   return (
     <>
-      <div className="hidden lg:flex flex-col items-center w-64 h-screen rounded-3xl bg-white border-r border-gray-300">
+      <div className="hidden lg:flex sticky left-0 top-0 flex-col items-center w-64 h-screen rounded-3xl bg-white border-r border-gray-300">
         <h1 className="text-black text-3xl font-bold my-6">Yolo:Home</h1>
         <div className="mt-auto w-[80%] border-gray-400" />
         <nav className="flex-1 w-full flex flex-col items-center">
@@ -54,7 +54,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
             ))}
           </ul>
         </nav>
-        <div className="mt-auto p-6 w-[80%] border-t border-[rgba(0,0,0,0.1)]">
+        <div className="mt-auto pt-2 pb-6 px-6 w-[80%] border-t border-[rgba(0,0,0,0.1)]">
           <div className="space-y-3 max-w-[200px] mx-auto">
             <button
               onClick={() => onAuthClick?.("login")}
@@ -68,13 +68,34 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
             >
               Sign up
             </button>
+            {/* <div>
+              <div className="w-full flex gap-x-1 flex-wrap">
+                <div className="font-semibold">
+                  Sam Wheeler
+                </div>
+                <div>
+                  -
+                </div>
+                <div className="text-[#4D4D4D]">
+                  User
+                </div>
+              </div>
+              <div className="text-[#4D4D4D] text-[14px]">
+                samwheeler@example.com
+              </div>
+            </div>
+            <button
+              className="w-full bg-[#EB6A63] hover:bg-[rgba(235,106,99,0.8)] text-[#FBFDFF] text-[24px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
+            >
+              Log out
+            </button> */}
           </div>
         </div>
       </div>
       <div className="px-3 md:px-7 lg:hidden flex items-center justify-between">
         <h1 className="text-black text-2xl md:text-3xl font-bold my-6">Yolo:Home</h1>
         <div className="flex gap-x-[10px] md:gap-x-[20px] items-center">
-          {/* <button
+          <button
             onClick={() => onAuthClick?.("login")}
             className="bg-[#4E7EF9] hover:bg-[rgba(78,126,249,0.9)] text-[#FBFDFF] text-[15px] font-semibold py-3 px-6 rounded-[20px] shadow-md cursor-pointer"
           >
@@ -85,7 +106,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
             className="bg-[rgba(249,249,249,0.1)] hover:bg-[rgba(249,249,249,0.8)] text-[#4D4D4D] text-[15px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
           >
             Sign up
-          </button> */}
+          </button>
           {
             menuItems.map((item, index) => (
               <div key={index} className="relative">
@@ -106,12 +127,11 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
               </div>
             ))
           }
-          <button
-            onClick={() => onAuthClick?.("signup")}
+          {/* <button
             className="bg-[#EB6A63] hover:bg-[rgba(235,106,99,0.8)] text-[#FBFDFF] text-[15px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
           >
             Log out
-          </button>
+          </button> */}
         </div>
       </div>
     </>

@@ -34,7 +34,8 @@ export default function PillButton({ label, items }: PillButtonProps) {
               bg-white
               text-[--text-soft]
               text-lg
-              min-w-[20rem]
+              lg:min-w-[20rem]
+              min-w-[13rem]
               px-4 py-5
               shadow-none
               hover:border-[#CFCFCF]

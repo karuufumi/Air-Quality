@@ -30,7 +30,7 @@ function AuthTemplate({
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold cursor-pointer"
           >
             ✕
           </button>
@@ -39,7 +39,7 @@ function AuthTemplate({
           <h2 className="text-[#262626] font-semibold text-3xl md:text-4xl">
             {title}
           </h2>
-          <p className="text-[#4d4d4d] text-sm sm:text-base font-medium mt-2">
+          <p className="text-[#4d4d4d] text-sm sm:text-base mt-2">
             {subtitle}
           </p>
         </div>
@@ -62,7 +62,7 @@ function SignInOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
       subtitle="Welcome back! Please login to access your account."
       onClose={onClose}
     >
-      <div className="flex flex-col w-full items-start my-2">
+      <div className="flex flex-col w-full items-start my-2 px-2 md:px-0">
         <div className="w-full my-2">
           <label className="text-[#262626] text-sm sm:text-base font-medium">
             Email
@@ -98,7 +98,7 @@ function SignInOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
           </div>
           <button
             type="submit"
-            className="block w-full bg-[#4E7EF9] rounded-md text-center p-2 my-4 text-white text-sm sm:text-base font-medium hover:bg-blue-600 transition-colors"
+            className="block w-full bg-[#4E7EF9] rounded-md text-center p-2 my-4 text-white text-sm sm:text-base font-medium hover:bg-blue-600 transition-colors cursor-pointer"
           >
             Login
           </button>
@@ -185,7 +185,7 @@ function SignUpOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
           </div>
           <button
             type="submit"
-            className="block w-full bg-[#4E7EF9] rounded-md text-center p-2 my-4 text-white text-sm sm:text-base font-medium hover:bg-blue-600 transition-colors"
+            className="block w-full bg-[#4E7EF9] rounded-md text-center p-2 my-4 text-white text-sm sm:text-base font-medium hover:bg-blue-600 transition-colors cursor-pointer"
           >
             Sign Up
           </button>

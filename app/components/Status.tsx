@@ -14,7 +14,7 @@ function Bar({ state }: { state: boolean }) {
 
 export default function Status() {
   return (
-    <div className="my-4 w-full flex flex-col gap-2">
+    <div className="lg:mt-[30px] w-full flex flex-col gap-y-[30px]">
       <div className="w-full p-2 bg-white rounded-[19px] shadow-md border">
         <h2 className="mx-4 my-1 font-bold">Current Status</h2>
         <div className="flex flex-row w-full font-semibold p-2">

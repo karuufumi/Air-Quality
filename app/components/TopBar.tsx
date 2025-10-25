@@ -29,7 +29,7 @@ export default function TopBar({
   });
 
   return (
-    <div className="flex flex-wrap items-center justify-between w-full p-4">
+    <div className="flex flex-wrap items-center justify-between w-full p-4 gap-x-2 gap-y-4">
       {/* Left side: Date and Time */}
       <div className="flex items-center gap-9 text-[#4D4D4D] text-lg font-bold">
         <div className="flex items-center gap-2">

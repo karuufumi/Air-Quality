@@ -2,7 +2,7 @@ import Image from "next/image"
 
 export default function SensorDisplay() {
   return (
-    <div className="w-full flex flex-col gap-y-[45px]">
+    <div className="w-full flex flex-col gap-y-[30px]">
         <div className="flex flex-col gap-y-2.5 w-full">
             <div className="flex items-center justify-between">
                 <div className="text-[15px] font-bold">Temperature</div>

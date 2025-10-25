@@ -38,8 +38,8 @@ export default function Activity() {
             id: 2, 
             name: "Day", 
             values: [
-                "0", "2", "4", "6", "8", "10",
-                "12", "14", "16", "18", "20", "22"
+                "0h", "2h", "4h", "6h", "8h", "10h",
+                "12h", "14h", "16h", "18h", "20h", "22h"
             ]
         },
         { 
@@ -60,7 +60,7 @@ export default function Activity() {
                         value={selectedSensor}
                         onValueChange={(value) => setSelectedSensor(value)}
                     >
-                        <SelectTrigger className="w-[100px] xl:w-[140px] cursor-pointer hover:border-[#CFCFCF]">
+                        <SelectTrigger className="w-[130px] xl:w-[140px] cursor-pointer hover:border-[#CFCFCF]">
                             <SelectValue placeholder="Temperature" />
                         </SelectTrigger>
                         <SelectContent>
@@ -75,7 +75,7 @@ export default function Activity() {
                         value={selectedTime}
                         onValueChange={(value) => setSelectedTime(value)}
                     >
-                        <SelectTrigger className="w-[100px] xl:w-[140px] cursor-pointer hover:border-[#CFCFCF]">
+                        <SelectTrigger className="w-[80px] xl:w-[140px] cursor-pointer hover:border-[#CFCFCF]">
                             <SelectValue placeholder="Month" />
                         </SelectTrigger>
                         <SelectContent>
