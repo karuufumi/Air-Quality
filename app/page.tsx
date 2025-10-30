@@ -26,7 +26,7 @@ export default function Home() {
         deviceItems={["All", "Device A", "Device B"]}
         showAddButton={true}
       />
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-[45px] md:gap-y-0">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-[45px] md:gap-y-[20px] lg:gap-y-0">
         <SensorDisplay />
         <Activity />
         <Status />

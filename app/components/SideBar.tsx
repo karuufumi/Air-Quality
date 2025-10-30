@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link";
 import { usePathname } from "next/navigation"
 import { useState } from "react";
 
@@ -17,7 +18,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
   const [showLabel, setShowLabel] = useState<number | null>(null)
   const menuItems: MenuItem[] = [
     { id: "Reports", icon: "fa fa-line-chart", href: "/" },
-    { id: "History", icon: "fa fa-history", href: "/History" },
+    { id: "History", icon: "fa fa-history", href: "/history" },
   ]
 
   const getActiveItem = () => {
@@ -30,7 +31,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
   return (
     <>
       <div className="hidden lg:flex sticky left-0 top-0 flex-col items-center w-64 h-screen rounded-3xl bg-white border-r border-gray-300">
-        <h1 className="text-black text-3xl font-bold my-6">Yolo:Home</h1>
+        <Link className="text-black text-3xl font-bold my-6 cursor-pointer" href="/">Yolo:Home</Link>
         <div className="mt-auto w-[80%] border-gray-400" />
         <nav className="flex-1 w-full flex flex-col items-center">
           <ul className="w-3/4">
@@ -43,13 +44,13 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
                     : "text-black font-medium"
                 }`}
               >
-                <a
+                <Link
                   href={item.href}
                   className="flex flex-row items-center pl-6"
                 >
                   <i className={`${item.icon} mr-2 ${item.id == activeItem ? "text-[#1B59F8]" : "text-black"}`} aria-hidden="true"></i>
                   <span className={`${item.id == activeItem ? "text-[#1B59F8]" : "text-black"} font-medium`}>{item.id}</span>
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -93,7 +94,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
         </div>
       </div>
       <div className="px-3 md:px-7 lg:hidden flex items-center justify-between">
-        <h1 className="text-black text-2xl md:text-3xl font-bold my-6">Yolo:Home</h1>
+        <Link className="text-black text-2xl md:text-3xl font-bold my-6" href="/">Yolo:Home</Link>
         <div className="flex gap-x-[10px] md:gap-x-[20px] items-center">
           <button
             onClick={() => onAuthClick?.("login")}
@@ -120,7 +121,7 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
                   </a>
                 </div>
                 {showLabel === index && (
-                  <div className='absolute top-[45px] left-[-10px] md:left-[-5px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[rgba(226,229,233,0.5)] text-[#4D4D4D] py-1.5 px-2 rounded-[25px] z-[11]'>
+                  <div className='absolute top-[55px] left-[-13px] md:left-[-5px] w-[65px] flex items-center justify-center text-[11px] font-semibold bg-[rgba(226,229,233,0.5)] text-[#4D4D4D] py-1.5 px-2 rounded-[25px] z-[11]'>
                     {item.id}
                   </div>
                 )}

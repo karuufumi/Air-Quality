@@ -54,7 +54,8 @@ export default function TopBar({
           <PillButton 
             label="Timestamp" 
             items={timestampItems}
-            onChange={(v) => onChangeTimestamp?.(v)}/>
+            onChange={(v) => onChangeTimestamp?.(v)}
+          />
         )} 
 
         {deviceItems && deviceItems.length > 0 && (
