@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation"
 import { useState } from "react";
+import { useUserStore } from "../store/useUserStore";
 
 interface MenuItem {
   id: string;
@@ -14,6 +15,7 @@ interface SideBarProps {
 }
 
 export default function SideBar({ onAuthClick }: SideBarProps) {
+  const { user, clear } = useUserStore();
   const pathname = usePathname()
   const [showLabel, setShowLabel] = useState<number | null>(null)
   const menuItems: MenuItem[] = [
@@ -57,57 +59,73 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
         </nav>
         <div className="mt-auto pt-2 pb-6 px-6 w-[80%] border-t border-[rgba(0,0,0,0.1)]">
           <div className="space-y-3 max-w-[200px] mx-auto">
-            <button
-              onClick={() => onAuthClick?.("login")}
-              className="w-full bg-[#4E7EF9] hover:bg-[rgba(78,126,249,0.9)] text-[#FBFDFF] text-[24px] font-semibold py-3 px-6 rounded-[20px] shadow-md cursor-pointer"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => onAuthClick?.("signup")}
-              className="w-full bg-[rgba(249,249,249,0.1)] hover:bg-[rgba(249,249,249,0.8)] text-[#4D4D4D] text-[24px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
-            >
-              Sign up
-            </button>
-            {/* <div>
-              <div className="w-full flex gap-x-1 flex-wrap">
-                <div className="font-semibold">
-                  Sam Wheeler
-                </div>
-                <div>
-                  -
-                </div>
-                <div className="text-[#4D4D4D]">
-                  User
-                </div>
-              </div>
-              <div className="text-[#4D4D4D] text-[14px]">
-                samwheeler@example.com
-              </div>
-            </div>
-            <button
-              className="w-full bg-[#EB6A63] hover:bg-[rgba(235,106,99,0.8)] text-[#FBFDFF] text-[24px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
-            >
-              Log out
-            </button> */}
+            {
+              !user ? (
+                <>
+                  <button
+                    onClick={() => onAuthClick?.("login")}
+                    className="w-full bg-[#4E7EF9] hover:bg-[rgba(78,126,249,0.9)] text-[#FBFDFF] text-[24px] font-semibold py-3 px-6 rounded-[20px] shadow-md cursor-pointer"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => onAuthClick?.("signup")}
+                    className="w-full bg-[rgba(249,249,249,0.1)] hover:bg-[rgba(249,249,249,0.8)] text-[#4D4D4D] text-[24px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
+                  >
+                    Sign up
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <div className="w-full flex gap-x-1 flex-wrap">
+                      <div className="font-semibold">
+                        {user.email.split("@")[0].charAt(0).toUpperCase() + user.email.split("@")[0].slice(1)}
+                      </div>
+                      <div>
+                        -
+                      </div>
+                      <div className="text-[#4D4D4D]">
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </div>
+                    </div>
+                    <div className="text-[#4D4D4D] text-[14px]">
+                      {user.email}
+                    </div>
+                  </div>
+                  <button
+                    className="w-full bg-[#EB6A63] hover:bg-[rgba(235,106,99,0.8)] text-[#FBFDFF] text-[24px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
+                    onClick={() => clear()}
+                  >
+                    Log out
+                  </button>
+                </>
+              )
+            }
           </div>
         </div>
       </div>
       <div className="px-3 md:px-7 lg:hidden flex items-center justify-between">
         <Link className="text-black text-2xl md:text-3xl font-bold my-6" href="/">Yolo:Home</Link>
         <div className="flex gap-x-[10px] md:gap-x-[20px] items-center">
-          <button
-            onClick={() => onAuthClick?.("login")}
-            className="bg-[#4E7EF9] hover:bg-[rgba(78,126,249,0.9)] text-[#FBFDFF] text-[15px] font-semibold py-3 px-6 rounded-[20px] shadow-md cursor-pointer"
-          >
-            Login
-          </button>
-          <button
-            onClick={() => onAuthClick?.("signup")}
-            className="bg-[rgba(249,249,249,0.1)] hover:bg-[rgba(249,249,249,0.8)] text-[#4D4D4D] text-[15px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
-          >
-            Sign up
-          </button>
+          {
+            !user && (
+              <>
+                <button
+                  onClick={() => onAuthClick?.("login")}
+                  className="bg-[#4E7EF9] hover:bg-[rgba(78,126,249,0.9)] text-[#FBFDFF] text-[15px] font-semibold py-3 px-6 rounded-[20px] shadow-md cursor-pointer"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => onAuthClick?.("signup")}
+                  className="bg-[rgba(249,249,249,0.1)] hover:bg-[rgba(249,249,249,0.8)] text-[#4D4D4D] text-[15px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
+                >
+                  Sign up
+                </button>
+              </>
+            )
+          }
           {
             menuItems.map((item, index) => (
               <div key={index} className="relative">
@@ -128,11 +146,16 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
               </div>
             ))
           }
-          {/* <button
-            className="bg-[#EB6A63] hover:bg-[rgba(235,106,99,0.8)] text-[#FBFDFF] text-[15px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
-          >
-            Log out
-          </button> */}
+          {
+            user && (
+              <button
+                className="bg-[#EB6A63] hover:bg-[rgba(235,106,99,0.8)] text-[#FBFDFF] text-[15px] font-semibold py-3 px-6 rounded-[20px] border-[0.2px] border-[rgba(0,0,0,0.1)] shadow-md cursor-pointer"
+                onClick={() => clear()}
+              >
+                Log out
+              </button>
+            )
+          }
         </div>
       </div>
     </>

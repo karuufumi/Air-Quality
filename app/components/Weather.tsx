@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { fetchWeatherApi } from "openmeteo";
 import Image from "next/image";
+import { useUserStore } from "../store/useUserStore";
 
 type WeatherData = {
   time?: Date | null;
@@ -135,6 +136,7 @@ function CategoryToIcon(category?: string): string {
 }
 
 export default function Weather() {
+  const { user } = useUserStore();
   const [curWeather, setCurWeather] = useState<WeatherData | null>(null);
   const [curAQ, setCurAQ] = useState<AQData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -161,34 +163,44 @@ export default function Weather() {
       <div className="w-full flex flex-col gap-y-3">
         <h2 className="mb-2">Indoor Air</h2>
         <div className="flex justify-center h-20">
-          <div
-            className={`relative flex w-[80%] lg:w-[60%] items-center rounded-4xl border-[2px] overflow-hidden ${"border-[curAQ?.color]"} shadow-md`}
-            style={{ borderColor: curAQ?.color ?? "#FFFFFF" }}
-          >
-            <div
-              className={
-                "flex-1 rounded-4xl bg-white pl-6 pr-6 md:pr-1 xl:pr-6 py-4 flex items-start" +
-                (curAQ?.category !== "Unhealthy for Sensitive Groups"
-                  ? "lg:flex-row items-center gap-1 lg:gap-2"
-                  : "flex-col")
-              }
-            >
-              <span>Air Quality: </span>
-              {curAQ?.category ?? "-"}
-            </div>
-            <div
-              className={`absolute right-0 top-0 ${"bg-[curAQ?.color]"} w-[25%] lg:w-[23%] h-full rounded-l-[30px] text-white flex items-center justify-center gap-2`}
-              style={{ backgroundColor: curAQ?.color ?? "#FFFFFF" }}
-            >
-              <Image
-                src={CategoryToIcon(curAQ?.category || "")}
-                alt="Air quality icon"
-                width={24}
-                height={24}
-              />
-              {curAQ?.pm2_5 ?? "-"}
-            </div>
-          </div>
+          {
+            user ? (
+              <div
+                className={`relative flex w-[80%] lg:w-[60%] items-center rounded-4xl border-[2px] overflow-hidden ${"border-[curAQ?.color]"} shadow-md`}
+                style={{ borderColor: curAQ?.color ?? "#FFFFFF" }}
+              >
+                <div
+                  className={
+                    "flex-1 rounded-4xl bg-white pl-6 pr-6 md:pr-1 xl:pr-6 py-4 flex items-start" +
+                    (curAQ?.category !== "Unhealthy for Sensitive Groups"
+                      ? "lg:flex-row items-center gap-1 lg:gap-2"
+                      : "flex-col")
+                  }
+                >
+                  <span>Air Quality: </span>
+                  {curAQ?.category ?? "-"}
+                </div>
+                <div
+                  className={`absolute right-0 top-0 ${"bg-[curAQ?.color]"} w-[25%] lg:w-[23%] h-full rounded-l-[30px] text-white flex items-center justify-center gap-2`}
+                  style={{ backgroundColor: curAQ?.color ?? "#FFFFFF" }}
+                >
+                  <Image
+                    src={CategoryToIcon(curAQ?.category || "")}
+                    alt="Air quality icon"
+                    width={24}
+                    height={24}
+                  />
+                  {curAQ?.pm2_5 ?? "-"}
+                </div>
+              </div>
+            ) : (
+              <div className="relative flex w-[80%] lg:w-[60%] items-center justify-center rounded-4xl border-[2px] overflow-hidden shadow-md bg-[#FFFFFF]">
+                <h1 className="text-2xl font-bold">
+                  -
+                </h1>
+              </div>
+            )
+          }
         </div>
       </div>
       <div className="w-full flex flex-col gap-y-3">

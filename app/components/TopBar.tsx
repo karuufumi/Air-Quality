@@ -3,6 +3,7 @@
 import React from "react";
 import { Calendar, Clock, Plus } from "lucide-react";
 import PillButton from "./PillButton";
+import { useUserStore } from "../store/useUserStore";
 
 interface TopBarProps {
   timestampItems?: string[];
@@ -33,6 +34,7 @@ export default function TopBar({
     minute: "2-digit",
     hour12: false,
   });
+  const { user } = useUserStore();
 
   return (
     <div className="flex flex-wrap items-center justify-between w-full p-4 gap-x-2 gap-y-4">
@@ -49,27 +51,31 @@ export default function TopBar({
       </div>
 
       {/* Right side: Dropdowns and Add button */}
-      <div className="flex items-center gap-3">
-        {timestampItems && timestampItems.length > 0 && (
-          <PillButton 
-            label="Timestamp" 
-            items={timestampItems}
-            onChange={(v) => onChangeTimestamp?.(v)}
-          />
-        )} 
+      {
+        user && (
+          <div className="flex items-center gap-3">
+            {timestampItems && timestampItems.length > 0 && (
+              <PillButton 
+                label="Timestamp" 
+                items={timestampItems}
+                onChange={(v) => onChangeTimestamp?.(v)}
+              />
+            )} 
 
-        {deviceItems && deviceItems.length > 0 && (
-          <PillButton label="Device" items={deviceItems} onChange={(v) => onChangeDevice?.(v)}/>
-        )}
+            {deviceItems && deviceItems.length > 0 && (
+              <PillButton label="Device" items={deviceItems} onChange={(v) => onChangeDevice?.(v)}/>
+            )}
 
-        {rightComponents}
+            {rightComponents}
 
-        {showAddButton && (
-          <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-(--bg-button) text-white cursor-pointer hover:bg-(--bg-button-hover)">
-            <Plus className="w-6 h-6" strokeWidth={4} />
+            {showAddButton && (
+              <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-(--bg-button) text-white cursor-pointer hover:bg-(--bg-button-hover)">
+                <Plus className="w-6 h-6" strokeWidth={4} />
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        )
+      }
     </div>
   );
 }
