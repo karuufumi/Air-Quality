@@ -1,0 +1,36 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("MONGODB_URI")
+}
+
+model User {
+    id       String @id @default(auto()) @map("_id") @db.ObjectId
+    email    String @unique
+    password String
+    role     String
+}
+
+model lux {
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId
+    timestamp       String
+    value           Float
+    timestamp_local DateTime
+}
+
+model rh {
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId
+    timestamp       String
+    value           Float
+    timestamp_local DateTime
+}
+
+model rt {
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId
+    timestamp       String
+    value           Float
+    timestamp_local DateTime
+}
