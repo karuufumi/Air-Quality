@@ -265,7 +265,7 @@ function SignUpOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
       });
 
       if (result.success) {
-        toast.success("Sign up successful! Please log in.");
+        toast.success("Sign up successful! Please verify your email in your inbox.");
         setAuthToggle(!authToggle);
         setIsLoading(false);
       } else {

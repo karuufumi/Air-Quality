@@ -75,6 +75,42 @@ export const userAPI = {
     });
     return response.json();
   },
+  changePassword: async (
+// userId không cần thiết trong URL nếu Route Handler là /api/auth
+    // nhưng ta vẫn giữ để đảm bảo token được lấy
+    userId: string, 
+    token: string,
+    currentPassword: string,
+    newPassword: string
+) => {
+    try {
+        // Giả sử Route Handler được đặt tại /api/auth/route.ts
+        const response = await fetch(`${BASE_API}/auth`, {
+            method: "PUT", 
+            headers: {
+                "Content-Type": "application/json",
+                // Gửi token để Server xác minh userId
+                Authorization: `Bearer ${token}`, 
+            },
+            body: JSON.stringify({ 
+                currentPassword: currentPassword, 
+                newPassword: newPassword 
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Trả về thông báo lỗi chi tiết từ server (ví dụ: Invalid current password)
+            return { success: false, message: data.message || "Server error occurred." };
+        }
+
+        return { success: true, message: "Password updated successfully." };
+    } catch (error) {
+        console.error("API error in changePassword:", error);
+        return { success: false, message: "Network error or internal client issue." };
+    }
+  },
 };
 
 export const adminAPI = {

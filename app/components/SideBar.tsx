@@ -24,11 +24,13 @@ export default function SideBar({ onAuthClick }: SideBarProps) {
       ? [
           { id: "Reports", icon: "fa fa-line-chart", href: "/" },
           { id: "History", icon: "fa fa-history", href: "/history" },
+          { id: "Profile", icon: "fa fa-user", href: "/profile" },
         ]
       : [
           { id: "Reports", icon: "fa fa-line-chart", href: "/" },
           { id: "History", icon: "fa fa-history", href: "/history" },
           { id: "Users", icon: "fa fa-users", href: "/users" },
+          { id: "Profile", icon: "fa fa-user", href: "/profile" },
         ];
 
   const getActiveItem = () => {
