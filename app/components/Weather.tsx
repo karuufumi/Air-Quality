@@ -124,7 +124,7 @@ async function LoadAirQualityCategory(): Promise<AQData> {
 
 function CategoryToIcon(category?: string): string {
   if (category === "Good") return "/icons/smile-circle.svg";
-  if (category === "Moderate") return "/icons/neutral.svg";
+  if (category === "Moderate") return "/icons/neutral-face.svg";
   if (
     category === "Unhealthy for Sensitive Groups" ||
     category === "Unhealthy" ||
@@ -132,7 +132,7 @@ function CategoryToIcon(category?: string): string {
     category === "Hazardous"
   )
     return "/icons/sad-circle.svg";
-  return "/icons/neutral.svg";
+  return "/icons/neutral-face.svg";
 }
 
 export default function Weather() {
@@ -163,44 +163,40 @@ export default function Weather() {
       <div className="w-full flex flex-col gap-y-3">
         <h2 className="mb-2">Indoor Air</h2>
         <div className="flex justify-center h-20">
-          {
-            user ? (
+          {user ? (
+            <div
+              className={`relative flex w-[80%] lg:w-[60%] items-center rounded-4xl border-[2px] overflow-hidden ${"border-[curAQ?.color]"} shadow-md`}
+              style={{ borderColor: curAQ?.color ?? "#FFFFFF" }}
+            >
               <div
-                className={`relative flex w-[80%] lg:w-[60%] items-center rounded-4xl border-[2px] overflow-hidden ${"border-[curAQ?.color]"} shadow-md`}
-                style={{ borderColor: curAQ?.color ?? "#FFFFFF" }}
+                className={
+                  "flex-1 rounded-4xl bg-white pl-6 pr-6 md:pr-1 xl:pr-6 py-4 flex items-start" +
+                  (curAQ?.category !== "Unhealthy for Sensitive Groups"
+                    ? "lg:flex-row items-center gap-1 lg:gap-2"
+                    : "flex-col")
+                }
               >
-                <div
-                  className={
-                    "flex-1 rounded-4xl bg-white pl-6 pr-6 md:pr-1 xl:pr-6 py-4 flex items-start" +
-                    (curAQ?.category !== "Unhealthy for Sensitive Groups"
-                      ? "lg:flex-row items-center gap-1 lg:gap-2"
-                      : "flex-col")
-                  }
-                >
-                  <span>Air Quality: </span>
-                  {curAQ?.category ?? "-"}
-                </div>
-                <div
-                  className={`absolute right-0 top-0 ${"bg-[curAQ?.color]"} w-[25%] lg:w-[23%] h-full rounded-l-[30px] text-white flex items-center justify-center gap-2`}
-                  style={{ backgroundColor: curAQ?.color ?? "#FFFFFF" }}
-                >
-                  <Image
-                    src={CategoryToIcon(curAQ?.category || "")}
-                    alt="Air quality icon"
-                    width={24}
-                    height={24}
-                  />
-                  {curAQ?.pm2_5 ?? "-"}
-                </div>
+                <span>Air Quality: </span>
+                {curAQ?.category ?? "-"}
               </div>
-            ) : (
-              <div className="relative flex w-[80%] lg:w-[60%] items-center justify-center rounded-4xl border-[2px] overflow-hidden shadow-md bg-[#FFFFFF]">
-                <h1 className="text-2xl font-bold">
-                  -
-                </h1>
+              <div
+                className={`absolute right-0 top-0 ${"bg-[curAQ?.color]"} w-[25%] lg:w-[23%] h-full rounded-l-[30px] text-white flex items-center justify-center gap-2`}
+                style={{ backgroundColor: curAQ?.color ?? "#FFFFFF" }}
+              >
+                <Image
+                  src={CategoryToIcon(curAQ?.category || "")}
+                  alt="Air quality icon"
+                  width={24}
+                  height={24}
+                />
+                {curAQ?.pm2_5 ?? "-"}
               </div>
-            )
-          }
+            </div>
+          ) : (
+            <div className="relative flex w-[80%] lg:w-[60%] items-center justify-center rounded-4xl border-[2px] overflow-hidden shadow-md bg-[#FFFFFF]">
+              <h1 className="text-2xl font-bold">-</h1>
+            </div>
+          )}
         </div>
       </div>
       <div className="w-full flex flex-col gap-y-3">

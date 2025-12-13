@@ -5,6 +5,7 @@ import { Account } from "../model";
 import { mockAccounts, mockDevices, mockUsers } from "../store/mockData";
 import { useUserStore } from "../store/useUserStore";
 import { toast } from "sonner";
+import { authAPI } from "@/lib/api";
 
 interface AuthOverlayProps {
   initialMode?: "login" | "signup";
@@ -43,9 +44,7 @@ function AuthTemplate({
           <h2 className="text-[#262626] font-semibold text-3xl md:text-4xl">
             {title}
           </h2>
-          <p className="text-[#4d4d4d] text-sm sm:text-base mt-2">
-            {subtitle}
-          </p>
+          <p className="text-[#4d4d4d] text-sm sm:text-base mt-2">{subtitle}</p>
         </div>
         {children}
       </div>
@@ -66,12 +65,12 @@ interface AuthToggleType {
 function SignInOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
   const { setUser, setUserDevices } = useUserStore();
   const baseData: Account = { email: "", password: "" };
-  
+
   const [formData, setFormData] = useState<Account>(baseData);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const validateForm = () : boolean => {
+  const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
     if (!formData.email) {
@@ -84,7 +83,7 @@ function SignInOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }
+  };
 
   const handleLogin = async () => {
     setErrors({});
@@ -93,31 +92,34 @@ function SignInOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
       return;
     }
 
-    const newErrors: FormErrors = {};
     setIsLoading(true);
 
-    setTimeout(() => {
-      const account = mockAccounts.find(acc => acc.email === formData.email && acc.password === formData.password);
-      if (account) {
-        const foundUser = mockUsers.find((user) => user.email === account.email);
-        if (foundUser) {
-          setUser(foundUser);
-          const deviceList = mockDevices.filter(device => device.ownerId === foundUser.id).map(device => device.name);
-          setUserDevices(deviceList);
-          setIsLoading(false);
-          toast.success("Login successful!");
-          if (onClose) onClose();
-        } else {
-          toast.error("User not found.");
-        }
+    try {
+      const result = await authAPI.login({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result.success) {
+        localStorage.setItem("token", result.token);
+        setUser(result.user);
+        toast.success("Login successful!");
+        setIsLoading(false);
+        if (onClose) onClose();
       } else {
-        newErrors.general = "Invalid email or password";
-        setErrors(newErrors);
-        toast.error("Invalid email or password");
+        setIsLoading(false);
+        setErrors({
+          general: result.message || "Login failed. Please try again.",
+        });
       }
+    } catch (error) {
+      console.error(error);
       setIsLoading(false);
-    }, 1000);
-  }
+      setErrors({
+        general: "An error occurred during login. Please try again.",
+      });
+    }
+  };
 
   return (
     <AuthTemplate
@@ -141,7 +143,9 @@ function SignInOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
               placeholder="Enter your Email"
             />
           </div>
-          {errors.email && (<div className="text-red-500 text-sm">{errors.email}</div>)}
+          {errors.email && (
+            <div className="text-red-500 text-sm">{errors.email}</div>
+          )}
         </div>
         <div className="w-full my-2">
           <div className="w-full flex flex-col gap-y-1">
@@ -159,7 +163,9 @@ function SignInOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
                 placeholder="Enter your Password"
               />
             </div>
-            {errors.password && (<div className="text-red-500 text-sm">{errors.password}</div>)}
+            {errors.password && (
+              <div className="text-red-500 text-sm">{errors.password}</div>
+            )}
           </div>
           <div className="text-end w-full">
             <a
@@ -169,7 +175,9 @@ function SignInOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
               Forgot your password?
             </a>
           </div>
-          {errors.general && (<div className="text-red-500 text-sm">{errors.general}</div>)}
+          {errors.general && (
+            <div className="text-red-500 text-sm">{errors.general}</div>
+          )}
           <button
             type="submit"
             disabled={isLoading}
@@ -221,7 +229,7 @@ function SignUpOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const validateForm = () : boolean => {
+  const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
     if (!formData.email) {
@@ -232,13 +240,16 @@ function SignUpOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
     if (!formData.password) {
       newErrors.password = "Password is required";
     }
+    if (!(formData.password.length >= 6)) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
     if (formData.password !== confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }
+  };
 
   const handleSignUp = async () => {
     setErrors({});
@@ -246,28 +257,27 @@ function SignUpOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
       return;
     }
 
-    const newErrors: FormErrors = {};
     setIsLoading(true);
+    try {
+      const result = await authAPI.signup({
+        email: formData.email,
+        password: formData.password,
+      });
 
-    setTimeout(() => {
-      const existingAccount = mockAccounts.find(acc => acc.email === formData.email);
-      if (existingAccount) {
-        newErrors.general = "An account with this email already exists";
-        setErrors(newErrors);
-        toast.error("An account with this email already exists");
-      } else {
-        mockUsers.push({
-          id: mockUsers.length + 1,
-          email: formData.email,
-          role: "user"
-        });
-        mockAccounts.push({ email: formData.email, password: formData.password });
-        setIsLoading(false);
+      if (result.success) {
         toast.success("Sign up successful! Please log in.");
         setAuthToggle(!authToggle);
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        toast.error(result.message || "Sign up failed. Please try again.");
       }
-    }, 1000);
-  }
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+      toast.error("An account with this email already exists");
+    }
+  };
 
   return (
     <AuthTemplate
@@ -291,7 +301,9 @@ function SignUpOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
               }
             />
           </div>
-          {errors.email && (<div className="text-red-500 text-sm">{errors.email}</div>)}
+          {errors.email && (
+            <div className="text-red-500 text-sm">{errors.email}</div>
+          )}
         </div>
         <div className="w-full my-2">
           <div className="w-full mb-2">
@@ -309,7 +321,9 @@ function SignUpOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
                 }
               />
             </div>
-            {errors.password && (<div className="text-red-500 text-sm">{errors.password}</div>)}
+            {errors.password && (
+              <div className="text-red-500 text-sm">{errors.password}</div>
+            )}
           </div>
           <div className="w-full mt-2">
             <label className="text-[#262626] text-sm sm:text-base font-medium">
@@ -324,9 +338,15 @@ function SignUpOverlay({ authToggle, setAuthToggle, onClose }: AuthToggleType) {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
-            {errors.confirmPassword && (<div className="text-red-500 text-sm">{errors.confirmPassword}</div>)}
+            {errors.confirmPassword && (
+              <div className="text-red-500 text-sm">
+                {errors.confirmPassword}
+              </div>
+            )}
           </div>
-          {errors.general && (<div className="text-red-500 text-sm">{errors.general}</div>)}
+          {errors.general && (
+            <div className="text-red-500 text-sm">{errors.general}</div>
+          )}
           <button
             type="submit"
             className="block w-full bg-[#4E7EF9] rounded-md text-center p-2 my-4 text-white text-sm sm:text-base font-medium hover:bg-blue-600 transition-colors cursor-pointer"
