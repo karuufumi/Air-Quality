@@ -3,28 +3,89 @@
 import Image from "next/image";
 import { Activity, Lightbulb } from "lucide-react";
 
-function Bar({ state }: { state: boolean }) {
+type LevelType = "normal" | "warning" | "critical" | "null";
+
+function determineLevel(
+  type: "temp" | "hum" | "light",
+  value: string | number
+): LevelType {
+  if (value === "-" || value === undefined || value === null) {
+    return "null";
+  }
+  const numericString = String(value).replace(/[^\d.-]/g, "");
+  const val = parseFloat(numericString);
+
+  if (isNaN(val)) return "null";
+  console.log("here", val);
+
+  if (type === "temp") {
+    if (val > 35 || val < 10) return "critical";
+    if (val > 30 || val < 15) return "warning";
+    return "normal";
+  }
+
+  if (type === "hum") {
+    if (val > 60 || val < 20) return "critical";
+    if (val > 70 || val < 30) return "warning";
+    return "normal";
+  }
+
+  if (type === "light") {
+    if (val < 50) return "critical";
+    if (val < 150) return "warning";
+    return "normal";
+  }
+
+  return "normal";
+}
+
+function GetStatus(sensorTime: Date | undefined) {
+  const maxOffset = 5 * 60 * 1000; // 5 minutes
+  const currTime = new Date().getTime();
+  // const currTime = new Date("2025-12-12T01:45:00.000+00:00").getTime();
+  const dataTime = sensorTime?.getTime();
+
+  if (dataTime && currTime) {
+    return currTime - dataTime < maxOffset;
+  }
+  return false;
+}
+
+function LevelBar({ level }: { level: LevelType }) {
+  let gradient = "";
+
+  switch (level) {
+    case "normal":
+      gradient = "from-[#2FEA9B] to-[#7FDD53]";
+      break;
+    case "warning":
+      gradient = "from-yellow-400 to-orange-500";
+      break;
+    case "critical":
+      gradient = "from-[#FF383C] to-red-700";
+      break;
+    case "null":
+      gradient = "bg-gray-300 animate-pulse";
+      break;
+  }
+
   return (
     <div
-      className={`w-[95%] h-4 rounded-full transition-all ${
-        state
-          ? "from-[#2FEA9B] to-[#7FDD53] bg-gradient-to-r"
-          : "bg-[#FF383C]/50"
-      }`}
+      className={`w-[95%] h-4 rounded-full transition-all bg-gradient-to-r ${gradient}`}
     ></div>
   );
 }
 
-function GetStatus(sensorTime: Date | undefined) {
-  const maxOffset = 5 * 60 * 1000;
-  // const currTime = new Date("2025-12-12T01:45:00.000+00:00").getTime();
-  // 1 min 39 sec after the most recent lux sensor time (if you want to test)
-  const currTime = new Date().getTime();
-  const dataTime = sensorTime?.getTime();
-  if (dataTime && currTime) {
-    return currTime - dataTime < maxOffset ? true : false;
-  }
-  return false;
+function StatusText({ isOnline }: { isOnline: boolean }) {
+  return (
+    <span
+      className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ml-2 ${
+        isOnline ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+      }`}
+    >
+      {isOnline ? "Online" : "Offline"}
+    </span>
+  );
 }
 
 type StatusProps = {
@@ -36,12 +97,17 @@ type StatusProps = {
     humidityTime: Date | undefined;
     lightIntensity: string | number;
     lightTime: Date | undefined;
-    // pir: string | number;
   };
 };
 
 export default function Status({ sensorvalues }: StatusProps) {
-  const statuses = {
+  const levels = {
+    temperature: determineLevel("temp", sensorvalues.temperatureC),
+    humidity: determineLevel("hum", sensorvalues.humidity),
+    light: determineLevel("light", sensorvalues.lightIntensity),
+  };
+
+  const isOnline = {
     temperature: GetStatus(sensorvalues.temperatureTime),
     humidity: GetStatus(sensorvalues.humidityTime),
     light: GetStatus(sensorvalues.lightTime),
@@ -50,58 +116,56 @@ export default function Status({ sensorvalues }: StatusProps) {
   return (
     <div className="lg:mt-[30px] w-full flex flex-col gap-y-[30px]">
       <div className="w-full p-2 bg-white rounded-[19px] shadow-md border lg:space-y-6 lg:py-4">
-        <h2 className="mx-4 my-1 font-bold">Current Status</h2>
+        <h2 className="mx-4 my-1 font-bold text-gray-700">Current Status</h2>
+
+        {/* --- Temperature Section --- */}
         <div className="flex flex-row w-full font-semibold p-2">
           <Image
             src={"./icons/temp-three-quarters.svg"}
             alt="Temperature Icon"
             width={24}
             height={24}
-            className="m-2"
+            className="m-2 select-none"
           />
           <div className="w-full">
-            <span>Temperature Sensor</span>
-            <Bar state={statuses.temperature} />
+            <div className="flex items-center mb-1">
+              <span>Temperature</span>
+              <StatusText isOnline={isOnline.temperature} />
+            </div>
+            <LevelBar level={levels.temperature} />
           </div>
         </div>
+
+        {/* --- Humidity Section --- */}
         <div className="flex flex-row w-full font-semibold p-2">
           <Image
             src={"./icons/humidity.svg"}
-            alt="Temperature Icon"
+            alt="Humidity Icon"
             width={24}
             height={24}
-            className="m-2"
+            className="m-2 select-none"
           />
           <div className="w-full">
-            <span>Humidity Sensor</span>
-            <Bar state={statuses.humidity} />
+            <div className="flex items-center mb-1">
+              <span>Humidity</span>
+              <StatusText isOnline={isOnline.humidity} />
+            </div>
+            <LevelBar level={levels.humidity} />
           </div>
         </div>
+
+        {/* --- Light Section --- */}
         <div className="flex flex-row w-full font-semibold p-2">
           <Lightbulb className="m-2" size={24} />
           <div className="w-full">
-            <span>Light Sensor</span>
-            <Bar state={statuses.light} />
+            <div className="flex items-center mb-1">
+              <span>Light Intensity</span>
+              <StatusText isOnline={isOnline.light} />
+            </div>
+            <LevelBar level={levels.light} />
           </div>
         </div>
       </div>
-      {/* <div className="w-full p-2 bg-white rounded-[19px] shadow-md border">
-        <h2 className="mx-4 my-1 font-bold">Current Status</h2>
-        <div className="flex flex-row w-full font-semibold p-2">
-          <Activity className="m-2" size={24} />
-          <div className="w-full">
-            <span>PIR Sensor</span>
-            <Bar state={statuses.pir} />
-          </div>
-        </div>
-        <div className="flex flex-row w-full font-semibold p-2">
-          <Lightbulb className="m-2" size={24} />
-          <div className="w-full">
-            <span>Light</span>
-            <Bar state={false} />
-          </div>
-        </div>
-      </div> */}
     </div>
   );
 }

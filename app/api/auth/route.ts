@@ -36,94 +36,45 @@ async function sendVerificationEmail(toEmail: string, token: string) {
     subject: "Xác minh Địa chỉ Email của bạn",
     html: `
             <h1>Chào mừng đến với Yolo Home!</h1>
+            <div>
             <p>Vui lòng nhấp vào liên kết dưới đây để xác minh địa chỉ email của bạn:</p>
             <a href="${verificationLink}" style="padding: 10px 20px; background-color: #4C6FFF; color: white; text-decoration: none; border-radius: 5px;">
                 Xác minh Email
             </a>
             <p>Nếu bạn không thể nhấp vào nút, sao chép và dán liên kết sau vào trình duyệt:</p>
             <p>${verificationLink}</p>
+            </div>
         `,
   };
 
   await transporter.sendMail(mailOptions);
 }
 
-
-// Hàm gửi email Đặt lại Mật khẩu
-async function sendResetPasswordEmail(toEmail: string, token: string) {
-  // URL này trỏ đến route handler mới mà chúng ta sẽ tạo, ví dụ: /reset-password?token=...
-  // Đây sẽ là một trang UI trên client (Next.js Page) để người dùng nhập mật khẩu mới.
-  const resetLink = `${process.env.BASE_URL}/reset-password?token=${token}`; 
+async function sendPasswordResetEmail(toEmail: string, token: string) {
+  const resetLink = `${
+    process.env.BASE_URL || "http://localhost:3000"
+  }/reset-password?token=${token}`;
 
   const mailOptions = {
     from: `Yolo Home <${EMAIL_USER}>`,
     to: toEmail,
-    subject: "Yêu cầu Đặt lại Mật khẩu",
+    subject: "Reset Your Password - Yolo Home",
     html: `
-            <h1>Đặt lại Mật khẩu của bạn</h1>
-            <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng nhấp vào liên kết dưới đây:</p>
-            <a href="${resetLink}" style="padding: 10px 20px; background-color: #FF6F61; color: white; text-decoration: none; border-radius: 5px;">
-                Đặt lại Mật khẩu
-            </a>
-            <p>Liên kết này sẽ hết hạn sau 1 giờ.</p>
-            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-            <p>Nếu bạn không thể nhấp vào nút, sao chép và dán liên kết sau vào trình duyệt:</p>
-            <p>${resetLink}</p>
-        `,
+      <h1>Reset Your Password</h1>
+      <p>You requested to reset your password for your Yolo Home account.</p>
+      <p>Click the link below to reset your password:</p>
+      <a href="${resetLink}" style="padding: 10px 20px; background-color: #4C6FFF; color: white; text-decoration: none; border-radius: 5px;">
+        Reset Password
+      </a>
+      <p>If you can't click the button, copy and paste this link into your browser:</p>
+      <p>${resetLink}</p>
+      <p><strong>This link will expire in 1 hour.</strong></p>
+      <p>If you didn't request this password reset, please ignore this email.</p>
+    `,
   };
 
   await transporter.sendMail(mailOptions);
 }
-
-
-// Hàm xử lý yêu cầu Quên Mật khẩu (Chỉ gửi email)
-async function handleForgotPassword(email: string) {
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  // LUÔN LUÔN trả về một thông báo thành công chung chung để tránh tiết lộ liệu email có tồn tại hay không.
-  if (!user || !user.isVerified) {
-    // Vẫn trả về thành công để tránh tấn công enumeration (liệt kê)
-    return NextResponse.json(
-      { success: true, message: "If an account with that email exists, a password reset link has been sent." },
-      { status: 200 }
-    );
-  }
-
-  try {
-    // 1. TẠO RESET TOKEN (hết hạn trong 1 giờ)
-    // Token này KHÔNG cần chứa nhiều thông tin, chỉ cần id để xác định người dùng sau này.
-    const resetToken = jwt.sign(
-      { id: user.id }, 
-      JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-    
-    // **LƯU Ý QUAN TRỌNG:** Trong một ứng dụng thực tế, bạn nên mã hóa và lưu trữ `resetToken` trong DB, 
-    // và chỉ gửi token thô đã được tạo (ở đây là `resetToken`) qua email.
-    // Sau đó, khi người dùng gửi lại token, bạn đối chiếu nó với phiên bản đã lưu trữ trong DB.
-    // Tuy nhiên, vì mục đích đơn giản, chúng ta sẽ chỉ dựa vào JWT hết hạn trong 1h.
-    
-    // 2. GỬI EMAIL ĐẶT LẠI MẬT KHẨU
-    await sendResetPasswordEmail(user.email, resetToken);
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "If an account with that email exists, a password reset link has been sent.",
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error during forgot password:", error);
-    return NextResponse.json(
-      { success: false, message: "Error sending password reset email." },
-      { status: 500 }
-    );
-  }
-}
-
 
 async function handleSignup(email: string, password: string) {
   const existingUser = await prisma.user.findUnique({
@@ -163,14 +114,18 @@ async function handleSignup(email: string, password: string) {
     return NextResponse.json(
       {
         success: true,
-        message: "User created successfully. Please check your email to verify your account.",
+        message:
+          "User created successfully. Please check your email to verify your account.",
       },
       { status: 201 }
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { success: false, message: "Error creating user or sending verification email." },
+      {
+        success: false,
+        message: "Error creating user or sending verification email.",
+      },
       { status: 500 }
     );
   }
@@ -189,11 +144,14 @@ async function handleLogin(email: string, password: string) {
   }
 
   if (!user.isVerified) {
-      return NextResponse.json(
-        { success: false, message: "Please verify your email address before logging in." },
-        { status: 403 }
-      );
-    }
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Please verify your email address before logging in.",
+      },
+      { status: 403 }
+    );
+  }
 
   if (!user) {
     return NextResponse.json(
@@ -239,6 +197,112 @@ async function handleLogin(email: string, password: string) {
   }
 }
 
+async function handleForgotPassword(email: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: true,
+          message:
+            "If an account with that email exists, we've sent a password reset link.",
+        },
+        { status: 200 }
+      );
+    }
+
+    const resetToken = jwt.sign(
+      { id: user.id, email: user.email, purpose: "password-reset" },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    await sendPasswordResetEmail(user.email, resetToken);
+
+    return NextResponse.json(
+      {
+        success: true,
+        message:
+          "If an account with that email exists, we've sent a password reset link.",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return NextResponse.json(
+      { success: false, message: "Error sending password reset email." },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleResetPassword(token: string, newPassword: string) {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as AuthPayload & {
+      purpose?: string;
+    };
+
+    if (decoded.purpose !== "password-reset") {
+      return NextResponse.json(
+        { success: false, message: "Invalid reset token." },
+        { status: 400 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "User not found." },
+        { status: 404 }
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Password has been reset successfully.",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Reset token has expired. Please request a new password reset.",
+        },
+        { status: 400 }
+      );
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      return NextResponse.json(
+        { success: false, message: "Invalid reset token." },
+        { status: 400 }
+      );
+    }
+
+    console.error("Reset password error:", error);
+    return NextResponse.json(
+      { success: false, message: "Error resetting password." },
+      { status: 500 }
+    );
+  }
+}
 
 // Hàm tiện ích để xác thực Token và lấy userId
 function verifyToken(request: Request): AuthPayload | null {
@@ -260,10 +324,8 @@ function verifyToken(request: Request): AuthPayload | null {
   }
 }
 
-
 // Phương thức PUT để xử lý yêu cầu đổi mật khẩu
 export async function PUT(request: Request) {
-
   // 1. XÁC THỰC: Lấy thông tin người dùng từ JWT Token trong Header
   const authInfo = verifyToken(request);
   if (!authInfo) {
@@ -315,7 +377,10 @@ export async function PUT(request: Request) {
     // 5. Kiểm tra mật khẩu mới khác mật khẩu cũ
     if (currentPassword === newPassword) {
       return NextResponse.json(
-        { success: false, message: "New password must be different from the current password." },
+        {
+          success: false,
+          message: "New password must be different from the current password.",
+        },
         { status: 400 }
       );
     }
@@ -349,7 +414,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const { action, email, password } = body;
+    const { action, email, password, token, newPassword } = body;
 
     if (!action) {
       return NextResponse.json(
@@ -363,10 +428,10 @@ export async function POST(request: Request) {
         return await handleSignup(email, password);
       case "login":
         return await handleLogin(email, password);
-      case "forgot-password":
-        // Chỉ cần email
-        if (!email) throw new Error("Missing email for forgot password.");
+      case "forgotPassword":
         return await handleForgotPassword(email);
+      case "resetPassword":
+        return await handleResetPassword(token, newPassword);
       default:
         return NextResponse.json(
           { success: false, message: "Invalid action." },

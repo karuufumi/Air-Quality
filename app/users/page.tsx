@@ -323,7 +323,7 @@ export default function UsersPage() {
                 className="border border-gray-300 rounded-md p-2 w-full mb-4 cursor-pointer"
                 value={roleEditUser}
                 onChange={(e) => setRoleEditUser(e.target.value)}
-                disabled={isEditing || editUser?.role === "admin"}
+                disabled={isEditing}
               >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
