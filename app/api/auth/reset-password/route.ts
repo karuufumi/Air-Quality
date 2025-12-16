@@ -16,8 +16,6 @@ export async function POST(request: Request) {
   const token = searchParams.get("token");
   const { newPassword } = await request.json();
 
-  console.log("Received reset password request with token:", token);
-
   if (!token || !newPassword) {
     return NextResponse.json(
       { success: false, message: "Missing token or new password." },
@@ -37,7 +35,10 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "User not found or token is invalid/expired." },
+        {
+          success: false,
+          message: "User not found or token is invalid/expired.",
+        },
         { status: 404 }
       );
     }
@@ -63,7 +64,11 @@ export async function POST(request: Request) {
     // Lỗi có thể là `TokenExpiredError` hoặc `JsonWebTokenError`
     console.error("Error resetting password:", error);
     return NextResponse.json(
-      { success: false, message: "Invalid or expired token. Please try the forgot password process again." },
+      {
+        success: false,
+        message:
+          "Invalid or expired token. Please try the forgot password process again.",
+      },
       { status: 400 }
     );
   }

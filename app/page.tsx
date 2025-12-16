@@ -29,11 +29,13 @@ export default function Home() {
   const [deviceFilter, setDeviceFilter] = useState<string>(deviceList[0]);
 
   const [latestData, setLatestData] = useState<Row[]>([]);
+  const blankData = useMemo(() => {
+    return {
+      value: "-",
+      time: undefined,
+    };
+  }, []);
 
-  const blankData: SensorData = {
-    value: "-",
-    time: undefined,
-  };
   const [updatedTemperature, setUpdatedTemperature] =
     useState<SensorData>(blankData);
   const [updatedHumidity, setUpdatedHumidity] = useState<SensorData>(blankData);
@@ -141,7 +143,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, deviceFilter]);
+  }, [user, deviceFilter, blankData]);
 
   useEffect(() => {
     fetchHistoryData();

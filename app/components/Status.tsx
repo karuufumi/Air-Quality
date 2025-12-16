@@ -16,7 +16,6 @@ function determineLevel(
   const val = parseFloat(numericString);
 
   if (isNaN(val)) return "null";
-  console.log("here", val);
 
   if (type === "temp") {
     if (val > 35 || val < 10) return "critical";

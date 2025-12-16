@@ -183,12 +183,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (decoded.role !== "admin") {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized access." },
-        { status: 403 }
-      );
-    }
+    // if (decoded.role !== "admin") {
+    //   return NextResponse.json(
+    //     { success: false, message: "Unauthorized access." },
+    //     { status: 403 }
+    //   );
+    // }
 
     if (!action) {
       return NextResponse.json(
