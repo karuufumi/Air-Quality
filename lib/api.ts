@@ -1,200 +1,56 @@
-import { Metric } from "@/app/model";
-
-const BASE_API = "http://localhost:3000/api";
+const BASE_URL = "https://iot-stuff-production.up.railway.app";
 
 export const authAPI = {
-  signup: async (usersData: { email: string; password: string }) => {
-    const reponse = await fetch(`${BASE_API}/auth`, {
+  async login(payload: { email: string; password: string }) {
+    const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        action: "signup",
-        ...usersData,
-      }),
+      body: JSON.stringify(payload),
     });
-    return reponse.json();
-  },
 
-  login: async (usersData: { email: string; password: string }) => {
-    const reponse = await fetch(`${BASE_API}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "login",
-        ...usersData,
-      }),
-    });
-    return reponse.json();
-  },
-
-  forgotPassword: async (email: string) => {
-    const response = await fetch(`${BASE_API}/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "forgot-password",
-        email,
-      }),
-    });
-    return response.json();
-  },
-
-  resetPassword: async (data: { token: string; newPassword: string }) => {
-    const response = await fetch(
-      `${BASE_API}/auth/reset-password?token=${data.token}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ newPassword: data.newPassword }),
-      }
-    );
-    return response.json();
-  }
-};
-
-export const userAPI = {
-  getHistoryData: async (
-    userId: string,
-    token: string,
-    timestampFilter: "All"| "Year" | "Month" | "Week" | "Day"
-  ) => {
-    const response = await fetch(`${BASE_API}/user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "getHistoryData",
-        userId,
-        token,
-        timestampFilter,
-      }),
-    });
-    return response.json();
-  },
-  updateData: async (
-    userId: string,
-    token: string,
-    rowId: string,
-    newValue: number,
-    sensor: Metric
-  ) => {
-    const response = await fetch(`${BASE_API}/user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "updateData",
-        userId,
-        token,
-        rowId,
-        newValue,
-        sensor,
-      }),
-    });
-    return response.json();
-  },
-  changePassword: async (
-// userId không cần thiết trong URL nếu Route Handler là /api/auth
-    // nhưng ta vẫn giữ để đảm bảo token được lấy
-    userId: string, 
-    token: string,
-    currentPassword: string,
-    newPassword: string
-) => {
-    try {
-        // Giả sử Route Handler được đặt tại /api/auth/route.ts
-        const response = await fetch(`${BASE_API}/auth`, {
-            method: "PUT", 
-            headers: {
-                "Content-Type": "application/json",
-                // Gửi token để Server xác minh userId
-                Authorization: `Bearer ${token}`, 
-            },
-            body: JSON.stringify({ 
-                currentPassword: currentPassword, 
-                newPassword: newPassword 
-            }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            // Trả về thông báo lỗi chi tiết từ server (ví dụ: Invalid current password)
-            return { success: false, message: data.message || "Server error occurred." };
-        }
-
-        return { success: true, message: "Password updated successfully." };
-    } catch (error) {
-        console.error("API error in changePassword:", error);
-        return { success: false, message: "Network error or internal client issue." };
+    if (!res.ok) {
+      return { success: false, message: "Invalid credentials" };
     }
-  },
-};
 
-export const adminAPI = {
-  addUser: async (
-    userData: { email: string; role: "admin" | "user" },
-    token: string
-  ) => {
-    const response = await fetch(`${BASE_API}/admin`, {
+    const data = await res.json();
+
+    return {
+      success: true,
+      token: data.access_token,
+      user: data.user,
+    };
+  },
+
+  async signup(payload: { email: string; password: string }) {
+    const res = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ action: "addUser", ...userData, token }),
+      body: JSON.stringify(payload),
     });
-    return response.json();
+
+    if (!res.ok) {
+      const err = await res.json();
+      return { success: false, message: err.detail };
+    }
+
+    return { success: true };
   },
 
-  getUsers: async (token: string) => {
-    const response = await fetch(`${BASE_API}/admin`, {
-      method: "POST",
+  async me(token: string) {
+    const res = await fetch(`${BASE_URL}/auth/me`, {
       headers: {
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ action: "getUsers", token }),
     });
-    return response.json();
-  },
 
-  deleteUser: async (userId: string, token: string) => {
-    const response = await fetch(`${BASE_API}/admin`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ action: "deleteUser", token, userId }),
-    });
-    return response.json();
-  },
+    if (!res.ok) {
+      return null;
+    }
 
-  updateUser: async (
-    userId: string,
-    updateData: { email?: string; role?: "admin" | "user" },
-    token: string
-  ) => {
-    const response = await fetch(`${BASE_API}/admin`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "updateUser",
-        ...updateData,
-        token,
-        userId,
-      }),
-    });
-    return response.json();
+    return await res.json();
   },
 };
