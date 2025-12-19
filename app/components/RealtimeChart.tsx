@@ -17,14 +17,14 @@ export default function RealtimeChart() {
 
   if (history.length < 2) {
     return (
-      <div className="h-[300px] flex items-center justify-center text-gray-400">
+      <div className="h-75 flex items-center justify-center text-gray-400">
         Waiting for realtime data…
       </div>
     );
   }
 
   return (
-    <div className="h-[300px] w-full rounded-xl border p-4">
+    <div className="h-75 w-full rounded-xl border p-4">
       <h2 className="mb-2 font-semibold">Realtime Sensors</h2>
 
       <ResponsiveContainer width="100%" height="100%">

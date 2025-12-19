@@ -10,7 +10,7 @@ type MetricPayload = {
   timestamp: string;
 };
 
-type HistoryPoint = {
+export type HistoryPoint = {
   time: string;
   temperature?: number;
   humidity?: number;
@@ -36,7 +36,11 @@ export default function useRealtimeMetrics() {
 
       ws.onopen = () => {
         ws.send("ping");
-        pingRef.current = setInterval(() => ws.send("ping"), 3000);
+        pingRef.current = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send("ping");
+          }
+        }, 3000);
       };
 
       ws.onmessage = (event) => {
@@ -45,17 +49,24 @@ export default function useRealtimeMetrics() {
           const time = new Date(data.timestamp).toLocaleTimeString();
 
           setHistory((prev) => {
-            const last = prev[prev.length - 1] || {};
-            const next: HistoryPoint = { ...last, time };
+            const last = prev[prev.length - 1];
+
+            const base: HistoryPoint = last
+              ? { ...last }
+              : { time };
+
+            const next: HistoryPoint = { ...base, time };
 
             if (data.metric === "rt") {
               setTemperature(data.value);
               next.temperature = data.value;
             }
+
             if (data.metric === "rh") {
               setHumidity(data.value);
               next.humidity = data.value;
             }
+
             if (data.metric === "lux") {
               setLux(data.value);
               next.lux = data.value;
@@ -63,7 +74,9 @@ export default function useRealtimeMetrics() {
 
             return [...prev, next].slice(-MAX_POINTS);
           });
-        } catch {}
+        } catch {
+          // ignore keepalive / malformed messages
+        }
       };
 
       ws.onclose = () => {
@@ -73,6 +86,7 @@ export default function useRealtimeMetrics() {
     };
 
     connect();
+
     return () => {
       if (pingRef.current) clearInterval(pingRef.current);
       wsRef.current?.close();
