@@ -1,11 +1,4 @@
-import type { Metadata } from "next";
 import "./globals.css";
-import { Toaster } from "sonner";
-
-export const metadata: Metadata = {
-  title: "IoT Monitoring Platform",
-  description: "Real-time sensor dashboard",
-};
 
 export default function RootLayout({
   children,
@@ -14,9 +7,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="bg-white text-black">
         {children}
-        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

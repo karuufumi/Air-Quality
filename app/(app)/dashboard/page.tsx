@@ -1,6 +1,6 @@
 "use client";
 
-import { useRealtimeMetrics } from "@/app/hooks/useRealtimeMetrics";
+import useRealtimeMetrics from "@/app/hooks/useRealtimeMetrics";
 
 export default function DashboardPage() {
   const { temperature, humidity, lux } = useRealtimeMetrics();

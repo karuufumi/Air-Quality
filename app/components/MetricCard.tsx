@@ -1,15 +1,15 @@
 type Props = {
-  title: string;
-  value?: number;
-  unit: string;
+  label: string;
+  value: string;
+  unit?: string;
 };
 
-export default function MetricCard({ title, value, unit }: Props) {
+export default function MetricCard({ label, value, unit }: Props) {
   return (
-    <div className="rounded-xl border p-6 shadow-sm bg-white">
-      <p className="text-sm text-gray-500">{title}</p>
-      <p className="mt-2 text-3xl font-bold">
-        {value !== undefined ? `${value} ${unit}` : "—"}
+    <div className="bg-white border rounded-xl p-6 shadow-sm">
+      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-3xl font-bold mt-2">
+        {value} <span className="text-lg">{unit}</span>
       </p>
     </div>
   );
