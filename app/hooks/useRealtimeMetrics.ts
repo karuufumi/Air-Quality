@@ -2,10 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/* =======================
-   Types
-======================= */
-
 type Metric = "rt" | "rh" | "lux";
 
 type MetricPayload = {
@@ -21,48 +17,26 @@ type HistoryPoint = {
   lux?: number;
 };
 
-/* =======================
-   Config
-======================= */
-
 const WS_URL = "wss://iot-stuff-production.up.railway.app/ws/metrics";
-const HISTORY_LIMIT = 30; // points kept for charts
-
-/* =======================
-   Hook
-======================= */
+const MAX_POINTS = 60;
 
 export default function useRealtimeMetrics() {
   const wsRef = useRef<WebSocket | null>(null);
-  const pingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pingRef = useRef<NodeJS.Timeout | null>(null);
 
-  /* ---- realtime values ---- */
   const [temperature, setTemperature] = useState<number | null>(null);
   const [humidity, setHumidity] = useState<number | null>(null);
   const [lux, setLux] = useState<number | null>(null);
-
-  /* ---- history for charts ---- */
   const [history, setHistory] = useState<HistoryPoint[]>([]);
 
   useEffect(() => {
-    let ws: WebSocket;
-    let reconnectTimeout: ReturnType<typeof setTimeout>;
-
     const connect = () => {
-      ws = new WebSocket(WS_URL);
+      const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log("✅ WebSocket connected");
-
-        // FastAPI websocket requires client to send something
         ws.send("ping");
-
-        pingRef.current = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send("ping");
-          }
-        }, 3000);
+        pingRef.current = setInterval(() => ws.send("ping"), 3000);
       };
 
       ws.onmessage = (event) => {
@@ -71,56 +45,39 @@ export default function useRealtimeMetrics() {
           const time = new Date(data.timestamp).toLocaleTimeString();
 
           setHistory((prev) => {
-            const next: HistoryPoint = { time };
+            const last = prev[prev.length - 1] || {};
+            const next: HistoryPoint = { ...last, time };
 
             if (data.metric === "rt") {
               setTemperature(data.value);
               next.temperature = data.value;
             }
-
             if (data.metric === "rh") {
               setHumidity(data.value);
               next.humidity = data.value;
             }
-
             if (data.metric === "lux") {
               setLux(data.value);
               next.lux = data.value;
             }
 
-            return [...prev, next].slice(-HISTORY_LIMIT);
+            return [...prev, next].slice(-MAX_POINTS);
           });
-        } catch {
-          // ignore non-JSON keepalive echoes
-        }
-      };
-
-      ws.onerror = () => {
-        console.warn("⚠️ WebSocket error");
+        } catch {}
       };
 
       ws.onclose = () => {
-        console.warn("🔌 WebSocket disconnected, retrying…");
-
         if (pingRef.current) clearInterval(pingRef.current);
-
-        reconnectTimeout = setTimeout(connect, 2000);
+        setTimeout(connect, 2000);
       };
     };
 
     connect();
-
     return () => {
       if (pingRef.current) clearInterval(pingRef.current);
-      if (wsRef.current) wsRef.current.close();
-      clearTimeout(reconnectTimeout);
+      wsRef.current?.close();
     };
   }, []);
 
-  return {
-    temperature,
-    humidity,
-    lux,
-    history,
-  };
+  return { temperature, humidity, lux, history };
 }
